@@ -23,10 +23,9 @@ driver.get("https://library.municode.com/fl")
 county_elements = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "li a.index-link")))
 county_urls = [element.get_attribute('href') for element in county_elements]
 print(f"Found {len(county_urls)} county/city links to process.")
-temp = ['https://library.municode.com/fl/altamonte_springs', 'https://library.municode.com/fl/apalachicola']
 
 # --- Loop Through Each County ---
-for url in temp:
+for url in county_urls:
     print(f"\n--- Processing: {url} ---")
     try:
         driver.get(url)
