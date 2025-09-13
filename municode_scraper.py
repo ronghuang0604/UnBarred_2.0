@@ -23,17 +23,36 @@ driver.get("https://library.municode.com/fl")
 county_elements = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "li a.index-link")))
 county_urls = [element.get_attribute('href') for element in county_elements]
 print(f"Found {len(county_urls)} county/city links to process.")
+print(county_urls)
 failed_urls = []
 
-# example_urls = [
-#     'https://library.municode.com/fl/cape_coral',
-#     'https://library.municode.com/fl/fanning_springs',
-#     'https://library.municode.com/fl/apalachicola',
-#     'https://library.municode.com/fl/fort_meade'
+# --- EXAMPLE EDGE CASES ---
+# example_edge_cases = [
+#     'https://library.municode.com/fl/cape_coral', # download button on left side bar
+#     'https://library.municode.com/fl/lauderdale_lakes', # has download buttons for all cards
+#     'https://library.municode.com/fl/hillsborough_county',
+#     'https://library.municode.com/fl/fanning_springs', # no download buttons
+#     'https://library.municode.com/fl/ocoee', # only browse buttons
+#     'https://library.municode.com/fl/south_daytona', # browse and download buttons
+#     'https://library.municode.com/fl/fort_meade',
 # ]
 
+# --- RESUME SCRAPING ---
+# start_from_url = 'https://library.municode.com/fl/lake_park'
+# start_index = 0
+
+# # Find the index of the county you want to start from
+# for i, url in enumerate(county_urls):
+#     if url == start_from_url:
+#         start_index = i
+#         break
+
+# urls_to_process = county_urls[start_index:]
+# print(f"Resuming from {start_from_url}. Processing {len(urls_to_process)} remaining links.")
+
+
 # --- Loop Through Each County ---
-for url in county_urls:
+for url in failed_urls:
     print(f"\n--- Processing: {url} ---")
     try:
         driver.get(url)
@@ -57,7 +76,7 @@ for url in county_urls:
             modal_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.get-pdf-download-btn")))
             modal_button.click()
             print("    Download triggered.")    
-            time.sleep(30) # Wait for the download to finish
+            time.sleep(5)
     except (TimeoutException, StaleElementReferenceException):
         print(f"  -> No download buttons found on this page. Skipping.")
         failed_urls.append(url)
@@ -75,7 +94,7 @@ for url in county_urls:
 print("\n--- All downloads triggered. Waiting for files to complete... ---")
 start_time = time.time()
 while any(f.endswith('.crdownload') for f in os.listdir(download_directory)):
-    if time.time() - start_time > 90: # 90 seconds timeout
+    if time.time() - start_time > 900: # 900 seconds timeout
         print("!!! Final wait timed out. Some files may not have completed. !!!")
         break
     print("  - Downloads still in progress, checking again in 10 seconds...")
