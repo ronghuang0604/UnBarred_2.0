@@ -4,7 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, InvalidSessionIdException
 
 # --- Configuration ---
 download_directory = "/Users/ronghuang/Desktop/210/municode_pdfs"
@@ -25,10 +25,11 @@ county_urls = [element.get_attribute('href') for element in county_elements]
 print(f"Found {len(county_urls)} county/city links to process.")
 failed_urls = []
 
-# examples = [
+# example_urls = [
 #     'https://library.municode.com/fl/cape_coral',
 #     'https://library.municode.com/fl/fanning_springs',
-#     'https://library.municode.com/fl/alachua_county'
+#     'https://library.municode.com/fl/apalachicola',
+#     'https://library.municode.com/fl/fort_meade'
 # ]
 
 # --- Loop Through Each County ---
@@ -57,11 +58,11 @@ for url in county_urls:
             modal_button.click()
             print("    Download triggered.")    
             time.sleep(30) # Wait for the download to finish
-    except TimeoutException:
+    except (TimeoutException, StaleElementReferenceException):
         print(f"  -> No download buttons found on this page. Skipping.")
         failed_urls.append(url)
         continue
-    except InvalidSessionIdException as e:
+    except InvalidSessionIdException:
         print(f"  -> SESSION DIED. The browser may have crashed. Skipping this URL.")
         failed_urls.append(url)
         break 
